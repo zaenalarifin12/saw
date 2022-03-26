@@ -16,6 +16,7 @@
             <p>Ongkos: Rp. {{ $item->ongkos_kirim }}</p>
             <p>Internal: {{ $item->internal }}</p>
             <p>Kamera: {{ $item->kamera }}</p>
+            <p>Ram: {{ $item->ram }}</p>
             <p>Rangking : {{$loop->iteration }}</p>
             <p>Nilai : {{ $hasil_rangking[$loop->index]["hasil"] }}</p>
         </div>
