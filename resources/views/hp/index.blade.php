@@ -14,12 +14,17 @@
                     <!--begin::Card title-->
                     <div class="card-title">
                         <!--begin::Search-->
+
+                        <p class="ms-10">Daftar HP </p> <br/>
                         <div class="d-flex align-items-center position-relative my-1">
                             <!--begin::Svg Icon | path: icons/duotune/general/gen021.svg-->
                            
                             <!--end::Svg Icon-->
-                            
-                            </div>
+                        <form class="d-flex ms-10" action="{{ url("/hp") }}" method="GET">
+                            <input name="nama" class="form-control w-75" value="{{request()->get('nama') ? request()->get('nama') : ""}}" />
+                            <button class="ms-4 btn btn-sm btn-secondary">Cari</button>
+                        </form>    
+                        </div>
                         <!--end::Search-->
                     </div>
                     <!--begin::Card title-->
@@ -191,34 +196,33 @@
                 <!--begin::Card body-->
                 <div class="card-body py-4">
 
-                <form action="{{ url("calculasi") }}" method="GET" >
-
-                    <button type="submit" class="btn btn-primary">kalkulasi</button>
                     <div class="d-flex flex-wrap">
 
                     @foreach ($alternatif as $item)
 
                     <div class="card w-25 p-5 m-5 d" >
-                        <label class="checkbox">
-                            <input type="checkbox" name="pilih[]" value="{{$item->id}}"/> pilih
-                            <span></span>
-                        </label>
+                        
                         <img src="{{ asset("storage/$item->img") }}" />
                         <p>{{ $item->nama }}</p>
                         <p>Harga : Rp. {{ $item->harga }}</p>
                         <p>Ongkos: Rp. {{ $item->ongkos_kirim }}</p>
                         <p>Internal: {{ $item->internal }}</p>
                         <p>Kamera: {{ $item->kamera }}</p>
-                        <p>Rangking : {{$loop->iteration }}</p>
 
-                        {{-- <div class="menu-item px-3">
-                            <span class="menu-link px-3 btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_edit-{{ $item->id }}">Edit</span>
-                         </div> --}}
-
+                        <div class="d-flex ">
+                            <div class="menu-item">
+                                <span class="menu-link w-100 btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_edit-{{ $item->id }}">Edit</span>
+                             </div>
+                             <div class="menu-item px-3">
+                                <a href="{{ url("/hp/$item->id") }}" class="menu-link px-3 btn btn-sm btn-danger" >Delete</a>
+                            </div>
+    
+                        </div>
+                        
                     </div>
 
 
-                    {{-- <div class="modal fade"  id="modal_edit-{{$item->id}}" tabindex="-1">
+                    <div class="modal fade"  id="modal_edit-{{$item->id}}" tabindex="-1">
                         <!--begin::Modal dialog-->
                         <div class="modal-dialog modal-dialog-centered mw-650px">
                             <!--begin::Modal content-->
@@ -357,13 +361,12 @@
                             <!--end::Modal content-->
                         </div>
                         <!--end::Modal dialog-->
-                    </div> --}}
+                    </div>
 
                     @endforeach
 
                 </div>
 
-                </form>
                 </div>
                 <!--end::Card body-->
             </div>

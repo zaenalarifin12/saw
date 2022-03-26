@@ -4,57 +4,101 @@ namespace App\Http\Controllers;
 
 use App\Alternatif;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AlternatifController extends Controller
 {
-    public function calculasi(Request $request)
+    public function index(Request $request)
     {
-        /**
-         * analisa
-         */
-        // harga cost 
-        // ongkos cost 
-        // internal benefit
-        // ram  benefit
-        // kamera benefit
 
-        /**
-         * 
-         * normalisasi
-         */
-
-        // jika benefit maka bagi dengan nilai terbesar
-        $min_harga = Alternatif::min("harga");
-        $min_ongkos = Alternatif::min("ongkos_kirim");
-        $max_internal = Alternatif::max("internal");
-        $max_ram = Alternatif::max("ram");
-        $max_kamera = Alternatif::max("kamera");
-
-        $alternatif = Alternatif::whereIn("id", $request->pilih)->get();
-
-        $normalisasi = [];
-        foreach ($alternatif as $key => $value) {
-            $normalisasi[$key]["id"] = $value->id;
-            $normalisasi[$key]["harga"] = $value->harga / $min_harga;
-            $normalisasi[$key]["ongkos_kirim"] = $value->ongkos_kirim / $min_ongkos ;
-            $normalisasi[$key]["internal"] = $value->internal / $max_internal ;
-            $normalisasi[$key]["ram"] = $value->ram / $max_ram ;
-            $normalisasi[$key]["kamera"] = $value->kamera / $max_kamera ;
+        // harga ongkos_kirim internal ram kamera
+        if(!empty($request->nama)){
+            $alternatif = Alternatif::where("nama", "like", "%" . $request->nama . "%")
+            ->orWhere("harga", "like", "%" . $request->nama . "%")
+            ->orWhere("ongkos_kirim", "like", "%" . $request->nama . "%")
+            ->orWhere("internal", "like", "%" . $request->nama . "%")
+            ->orWhere("ram", "like", "%" . $request->nama . "%")
+            ->orWhere("kamera", "like", "%" . $request->nama . "%")
+            ->get();
+        }else{
+            $alternatif = Alternatif::get();
         }
-
-        $hasil_rangking = [];
-        $id_rangking = []; 
-        foreach ($normalisasi as $key => $value) {
-            $hasil_rangking[$key]["hasil"]  =  ($value["harga"] * 30) + ($value["ongkos_kirim"] * 10) + ($value["ram"] * 20) + ($value["internal"] * 20) + ($value["kamera"] * 20);
-            $hasil_rangking[$key]["id"]     =  $value["id"];
         
-            array_push($id_rangking, $value["id"]);
-        }
+        return view("hp.index", compact("alternatif"));
+    }
 
-        sort($id_rangking);
+    public function store(Request $request)
+    {
+        $originName     = $request->file("image")->getClientOriginalName();
+        $fileName       = pathinfo($originName, PATHINFO_FILENAME);
+        $extension      = $request->file("image")->getClientOriginalExtension();
+        $fileName       = "hp/". $fileName.'_'.time().'.'.$extension;
 
-        $result = Alternatif::whereIn("id", $id_rangking)->get();
+        $request->file("image")->storeAs(
+            "public", $fileName
+        );
+
+        Alternatif::create([
+            "nama"          => $request->nama,
+            "harga"          => $request->harga,
+            "ongkos_kirim"          => $request->ongkos_kirim,
+            "internal"          => $request->internal,
+            "kamera"          => $request->kamera,
+            "ram"          => $request->ram,
+            "img"          => $fileName,
+        ]);
+
+        return redirect("/hp")->with('message', 'HP telah ditambahkan');
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        
+        if($request->hasFile("image")){
+
+            $originName     = $request->file("image")->getClientOriginalName();
+            $fileName       = pathinfo($originName, PATHINFO_FILENAME);
+            $extension      = $request->file("image")->getClientOriginalExtension();
+            $fileName       = "hp/". $fileName.'_'.time().'.'.$extension;
+
+            $request->file("image")->storeAs(
+                "public", $fileName
+            );
+
+            $alternatif = Alternatif::where("id", $id)->first();
+            $alternatif->update([
+                "nama"          => $request->nama,
+                "harga"          => $request->harga,
+                "ongkos_kirim"          => $request->ongkos_kirim,
+                "internal"          => $request->internal,
+                "ram"          => $request->ram,
+                "kamera"          => $request->kamera,
+                "img"          => $fileName,
+            ]);
     
-        return view("calculasi.index", compact("result"));
+        }else {
+            $alternatif = Alternatif::where("id", $id)->first();
+            $alternatif->update([
+                "nama"          => $request->nama,
+                "harga"          => $request->harga,
+                "ongkos_kirim"          => $request->ongkos_kirim,
+                "ram"          => $request->ram,
+                "internal"          => $request->internal,
+                "kamera"          => $request->kamera,
+            ]);
+        }
+        
+        return redirect("/hp")->with('message', 'HP telah berhasil terupdate');;
+    }
+
+
+    public function delete($id)
+    {
+        $resto = Alternatif::where("id", $id)->first();
+
+        $resto->delete();
+
+        return redirect("/hp")->with('message', 'alternatif telah berhasil dihapus');;
     }
 }
